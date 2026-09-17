@@ -9,8 +9,8 @@
  */
 
 #include <stdio.h> // These three lines import various libraries
-#include <stdlib.h> // 
-#include <string.h>
+#include <stdlib.h> // Specifically, the last one imports standard input-output, this one imports the standard library header,
+#include <string.h> // and htis one imports adds... strings.
 
 #define MAX_LINE 1024 // Initially 256. Increased input line buffer to prevent input line truncation
 
@@ -20,21 +20,21 @@ typedef struct { // Begins definition of the Email structure type
     char date[16]; // Array buffer storing date string
 } Email; // Closes struct definition
 
-typedef struct {
-    Email *data;
-    int size;
-    int capacity;
-} MaxHeap;
+typedef struct { // Begins definition of MaxHeap struct
+    Email *data; // Array of emails in the heap
+    int size; // Number of elements currently in heap
+    int capacity; // Maximum capacity of heap before resizing
+} MaxHeap; // Closes MaxHeap struct definition
 
 // Helper function to map sender category string to integer priority score.
 // Higher number = higher priority.
-int get_category_priority(const char *sender) {
-    if (strcmp(sender, "Boss") == 0) return 5;
-    if (strcmp(sender, "Subordinate") == 0) return 4;
-    if (strcmp(sender, "Peer") == 0) return 3;
-    if (strcmp(sender, "ImportantPerson") == 0) return 2;
-    return 1; // OtherPerson
-}
+int get_category_priority(const char *sender) { // Function mapping category string to priority integer
+    if (strcmp(sender, "Boss") == 0) return 5; // Checks if Boss and returns priority 5
+    if (strcmp(sender, "Subordinate") == 0) return 4; // Checks if Subordinate and returns priority 4
+    if (strcmp(sender, "Peer") == 0) return 3; // Checks if Peer and returns priority 3
+    if (strcmp(sender, "ImportantPerson") == 0) return 2; // Checks if ImportantPerson and returns priority 2
+    return 1; // OtherPerson fallback priority
+} // Closes get_category_priority function
 
 // Converts MM-DD-YYYY (or M-D-YYYY string) into YYYYMMDD integer for chronological comparison
 int date_to_int(const char *date) { // Function parsing a date string into an integer value
@@ -46,100 +46,100 @@ int date_to_int(const char *date) { // Function parsing a date string into an in
 } // Closes date_to_int function block
 
 // Returns > 0 if email A has higher priority than email B, < 0 if B > A, 0 if equal
-int compare_emails(const Email *a, const Email *b) {
-    int prioA = get_category_priority(a->sender);
-    int prioB = get_category_priority(b->sender);
+int compare_emails(const Email *a, const Email *b) { // Function comparing priority of two emails
+    int prioA = get_category_priority(a->sender); // Calculates category priority for email A
+    int prioB = get_category_priority(b->sender); // Calculates category priority for email B
 
-    if (prioA != prioB) {
-        return prioA - prioB;
-    }
+    if (prioA != prioB) { // Checks if category priorities are different
+        return prioA - prioB; // Returns difference between category priorities
+    } // Closes priority difference check
     // Same category: newer date wins
-    return date_to_int(a->date) - date_to_int(b->date);
-}
+    return date_to_int(a->date) - date_to_int(b->date); // Compares date integers if categories match
+} // Closes compare_emails function
 
 // Initialize the Heap
-MaxHeap* create_heap(int initial_capacity) {
-    MaxHeap *heap = (MaxHeap*)malloc(sizeof(MaxHeap));
-    heap->capacity = initial_capacity;
-    heap->size = 0;
-    heap->data = (Email*)malloc(sizeof(Email) * heap->capacity);
-    return heap;
-}
+MaxHeap* create_heap(int initial_capacity) { // Allocates and initializes new heap
+    MaxHeap *heap = (MaxHeap*)malloc(sizeof(MaxHeap)); // Allocates heap struct memory
+    heap->capacity = initial_capacity; // Sets initial heap capacity
+    heap->size = 0; // Initializes heap size to 0
+    heap->data = (Email*)malloc(sizeof(Email) * heap->capacity); // Allocates memory for email array
+    return heap; // Returns pointer to created heap
+} // Closes create_heap function
 
-void swap(Email *a, Email *b) {
-    Email temp = *a;
-    *a = *b;
-    *b = temp;
-}
+void swap(Email *a, Email *b) { // Swaps contents of two email pointers
+    Email temp = *a; // Stores email A in temp variable
+    *a = *b; // Assigns email B to location A
+    *b = temp; // Assigns temp email to location B
+} // Closes swap function
 
 // Heapify up when inserting
-void heapify_up(MaxHeap *heap, int index) {
-    while (index > 0) {
-        int parent = (index - 1) / 2;
-        if (compare_emails(&heap->data[index], &heap->data[parent]) > 0) {
-            swap(&heap->data[index], &heap->data[parent]);
-            index = parent;
-        } else {
-            break;
-        }
-    }
-}
+void heapify_up(MaxHeap *heap, int index) { // Restores max-heap property upwards from index
+    while (index > 0) { // Continues until root node is reached
+        int parent = (index - 1) / 2; // Computes parent index
+        if (compare_emails(&heap->data[index], &heap->data[parent]) > 0) { // Checks if child has higher priority than parent
+            swap(&heap->data[index], &heap->data[parent]); // Swaps child and parent
+            index = parent; // Moves index to parent position
+        } else { // Runs if parent has higher or equal priority
+            break; // Breaks loop if heap property is satisfied
+        } // Closes priority comparison check
+    } // Closes heapify_up loop
+} // Closes heapify_up function
 
 // Heapify down when extracting max
-void heapify_down(MaxHeap *heap, int index) {
-    int largest = index;
-    int left = 2 * index + 1;
-    int right = 2 * index + 2;
+void heapify_down(MaxHeap *heap, int index) { // Restores max-heap property downwards from index
+    int largest = index; // Initializes largest index as current index
+    int left = 2 * index + 1; // Computes left child index
+    int right = 2 * index + 2; // Computes right child index
 
-    if (left < heap->size && compare_emails(&heap->data[left], &heap->data[largest]) > 0) {
-        largest = left;
-    }
-    if (right < heap->size && compare_emails(&heap->data[right], &heap->data[largest]) > 0) {
-        largest = right;
-    }
-    if (largest != index) {
-        swap(&heap->data[index], &heap->data[largest]);
-        heapify_down(heap, largest);
-    }
-}
+    if (left < heap->size && compare_emails(&heap->data[left], &heap->data[largest]) > 0) { // Checks if left child is larger
+        largest = left; // Sets largest index to left child
+    } // Closes left child check
+    if (right < heap->size && compare_emails(&heap->data[right], &heap->data[largest]) > 0) { // Checks if right child is larger
+        largest = right; // Sets largest index to right child
+    } // Closes right child check
+    if (largest != index) { // Checks if a child was larger than current node
+        swap(&heap->data[index], &heap->data[largest]); // Swaps current node with largest child
+        heapify_down(heap, largest); // Recursively heapifies down the affected subtree
+    } // Closes largest check
+} // Closes heapify_down function
 
-void insert_email(MaxHeap *heap, Email e) {
-    if (heap->size == heap->capacity) {
-        heap->capacity *= 2;
-        heap->data = (Email*)realloc(heap->data, sizeof(Email) * heap->capacity);
-    }
-    heap->data[heap->size] = e;
-    heapify_up(heap, heap->size);
-    heap->size++;
-}
+void insert_email(MaxHeap *heap, Email e) { // Inserts email into heap
+    if (heap->size == heap->capacity) { // Checks if heap capacity is full
+        heap->capacity *= 2; // Doubles heap capacity
+        heap->data = (Email*)realloc(heap->data, sizeof(Email) * heap->capacity); // Reallocates array buffer
+    } // Closes capacity expansion check
+    heap->data[heap->size] = e; // Places new email at end of heap
+    heapify_up(heap, heap->size); // Heapifies up from inserted element index
+    heap->size++; // Increments heap size
+} // Closes insert_email function
 
-void read_email(MaxHeap *heap) {
-    if (heap->size == 0) return;
+void read_email(MaxHeap *heap) { // Removes max email from top of heap
+    if (heap->size == 0) return; // Returns early if heap is empty
     
-    heap->data[0] = heap->data[heap->size - 1];
-    heap->size--;
-    if (heap->size > 0) {
-        heapify_down(heap, 0);
-    }
-}
+    heap->data[0] = heap->data[heap->size - 1]; // Replaces root element with last element
+    heap->size--; // Decrements heap size
+    if (heap->size > 0) { // Checks if heap still has elements left
+        heapify_down(heap, 0); // Heapifies down from root
+    } // Closes non-empty check
+} // Closes read_email function
 
-void free_heap(MaxHeap *heap) {
-    free(heap->data);
-    free(heap);
-}
+void free_heap(MaxHeap *heap) { // Frees dynamic memory used by heap
+    free(heap->data); // Frees array buffer storing emails
+    free(heap); // Frees heap structure pointer
+} // Closes free_heap function
 
-int main(void) {
-    MaxHeap *heap = create_heap(10);
-    char line[MAX_LINE];
+int main(void) { // Main execution function
+    MaxHeap *heap = create_heap(10); // Creates initial heap with capacity 10
+    char line[MAX_LINE]; // Line buffer array for stdin input
 
-    while (fgets(line, sizeof(line), stdin) != NULL) {
+    while (fgets(line, sizeof(line), stdin) != NULL) { // Reads input lines from stdin
         // Strip trailing newline character
-        line[strcspn(line, "\r\n")] = 0;
-        if (strlen(line) == 0) continue;
+        line[strcspn(line, "\r\n")] = 0; // Replaces newline or carriage return with null terminator
+        if (strlen(line) == 0) continue; // Skips line if empty
 
-        if (strncmp(line, "EMAIL ", 6) == 0) {
-            Email e;
-            char *token_str = line + 6;
+        if (strncmp(line, "EMAIL ", 6) == 0) { // Checks if input line is EMAIL command
+            Email e; // Creates email struct variable
+            char *token_str = line + 6; // Points past EMAIL prefix
             
             // Parse comma-delimited fields with matched field width limits
             sscanf(token_str, "%31[^,],%511[^,],%15s", e.sender, e.subject, e.date); // Parses fields using expanded width caps
@@ -151,26 +151,26 @@ int main(void) {
                 memmove(e.sender, s, strlen(s) + 1); // Shifts trimmed sender string in place to overwrite leading spaces
             } // Closes in-place string shift if block
             
-            insert_email(heap, e);
-        } 
-        else if (strcmp(line, "COUNT") == 0) {
-            printf("There are %d emails to read.\n", heap->size);
-        } 
-        else if (strcmp(line, "NEXT") == 0) {
-            if (heap->size > 0) {
-                printf("Next email:\n");
-                printf("Sender: %s\n", heap->data[0].sender);
-                printf("Subject: %s\n", heap->data[0].subject);
-                printf("Date: %s\n", heap->data[0].date);
-            }
-        } 
-        else if (strcmp(line, "READ") == 0) {
-            if (heap->size > 0) {
-                read_email(heap);
-            }
-        }
-    }
+            insert_email(heap, e); // Inserts parsed email into heap
+        } // Closes EMAIL command check
+        else if (strcmp(line, "COUNT") == 0) { // Checks if input line is COUNT command
+            printf("There are %d emails to read.\n\n", heap->size); // Prints count of emails in heap
+        } // Closes COUNT command check
+        else if (strcmp(line, "NEXT") == 0) { // Checks if input line is NEXT command
+            if (heap->size > 0) { // Checks if heap contains emails
+                printf("Next email:\n"); // Prints next email header label
+                printf("\tSender: %s\n", heap->data[0].sender); // Prints top email sender
+                printf("\tSubject: %s\n", heap->data[0].subject); // Prints top email subject
+                printf("\tDate: %s\n\n", heap->data[0].date); // Prints top email date
+            } // Closes non-empty check
+        } // Closes NEXT command check
+        else if (strcmp(line, "READ") == 0) { // Checks if input line is READ command
+            if (heap->size > 0) { // Checks if heap contains emails
+                read_email(heap); // Removes top priority email from heap
+            } // Closes non-empty check
+        } // Closes READ command check
+    } // Closes main input while loop
 
-    free_heap(heap);
-    return 0;
-}
+    free_heap(heap); // Frees heap dynamic memory
+    return 0; // Returns 0 indicating successful program execution
+} // Closes main function
