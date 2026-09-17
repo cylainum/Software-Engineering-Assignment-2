@@ -144,9 +144,12 @@ int main(void) {
             // Parse comma-delimited fields with matched field width limits
             sscanf(token_str, "%31[^,],%511[^,],%15s", e.sender, e.subject, e.date); // Parses fields using expanded width caps
             
-            // Trim leading/trailing whitespace if present
-            char *s = e.sender;
-            while(*s == ' ') s++;
+            // Trim leading whitespace if present
+            char *s = e.sender; // Gets local pointer pointing to start of sender buffer
+            while (*s == ' ') s++; // Advances local pointer forward past leading space characters
+            if (s != e.sender) { // Checks if leading spaces were found and skipped
+                memmove(e.sender, s, strlen(s) + 1); // Shifts trimmed sender string in place to overwrite leading spaces
+            } // Closes in-place string shift if block
             
             insert_email(heap, e);
         } 
