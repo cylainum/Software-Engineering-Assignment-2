@@ -1,0 +1,35 @@
+EMAIL Boss,Normal boss email,01-01-2026
+NEXT
+READ
+NEXT
+READ
+EMAIL Boss,Newest Boss Email,12-31-2025
+EMAIL Boss,Older Boss Email,01-01-2025
+EMAIL Boss,Middle Boss Email,06-15-2025
+EMAIL Subordinate,Subordinate Email 1,05-10-2024
+EMAIL Subordinate,Subordinate Email 2,05-10-2024
+EMAIL Peer,Subject with spaces inside it,08-20-2024
+EMAIL ImportantPerson,Health Insurance,03-15-2025
+EMAIL OtherPerson,Spam product,02-14-2025
+COUNT
+NEXT
+NEXT
+READ
+READ
+READ
+COUNT
+EMAIL Boss,Very short date,1-1-2026
+EMAIL ImportantPerson,New year boundary,01-01-2030
+EMAIL ImportantPerson,Old year boundary,12-31-1999
+EMAIL Boss,This subject line is exceptionally long and explicitly written to push the buffer limits of the line reader and sscanf parser to verify how the string truncates or expands across memory limits without corrupting date fields or dropping commas,07-04-2026
+COUNT
+NEXT
+READ
+READ
+READ
+READ
+READ
+READ
+READ
+READ
+COUNT
