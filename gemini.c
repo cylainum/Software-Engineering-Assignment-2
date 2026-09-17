@@ -12,13 +12,13 @@
 #include <stdlib.h> // 
 #include <string.h>
 
-#define MAX_LINE 256
+#define MAX_LINE 1024 // Initially 256. Increased input line buffer to prevent input line truncation
 
-typedef struct {
-    char sender[30];
-    char subject[100];
-    char date[15]; // Format: MM-DD-YYYY
-} Email;
+typedef struct { // Begins definition of the Email structure type
+    char sender[32]; // Array buffer storing sender category string
+    char subject[512]; // Expanded array buffer to hold exceptionally long subjects
+    char date[16]; // Array buffer storing date string
+} Email; // Closes struct definition
 
 typedef struct {
     Email *data;
@@ -141,8 +141,8 @@ int main(void) {
             Email e;
             char *token_str = line + 6;
             
-            // Parse comma-delimited fields
-            sscanf(token_str, "%29[^,],%99[^,],%14s", e.sender, e.subject, e.date);
+            // Parse comma-delimited fields with matched field width limits
+            sscanf(token_str, "%31[^,],%511[^,],%15s", e.sender, e.subject, e.date); // Parses fields using expanded width caps
             
             // Trim leading/trailing whitespace if present
             char *s = e.sender;
